@@ -55,10 +55,8 @@ plt.show()
 
 predictions = model.predict(test_images) 
 predicted_labels = np.argmax(predictions, axis=1) 
-
 num_samples = 10 
 plt.figure(figsize=(15, 4))
-
 for i in range(num_samples): 
     plt.subplot(1, num_samples, i + 1) 
     plt.imshow(test_images[i].reshape(28, 28), cmap='gray') 
@@ -66,4 +64,4 @@ for i in range(num_samples):
     plt.axis('off') 
 plt.suptitle("Sample Predictions on Test Images", fontsize=15) 
 plt.show()
-                    validation_split=0.2)
+                    
