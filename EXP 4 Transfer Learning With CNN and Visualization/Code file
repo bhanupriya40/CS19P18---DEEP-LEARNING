@@ -1,0 +1,172 @@
+import tensorflow as tf 
+from tensorflow.keras.applications import VGG16 
+from tensorflow.keras.models import Sequential 
+from tensorflow.keras.layers import Dense, Flatten, Dropout 
+from tensorflow.keras.optimizers import Adam 
+from tensorflow.keras.datasets import cifar10 
+from tensorflow.keras.utils import plot_model 
+import matplotlib.pyplot as plt 
+import numpy as np 
+
+from tensorflow.keras.datasets import cifar10 
+(x_train, y_train), (x_test, y_test) = cifar10.load_data() 
+x_train = x_train / 255.0 
+x_test = x_test / 255.0 
+
+vgg_base = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
+
+ for layer in vgg_base.layers: 
+    layer.trainable = False 
+
+model = Sequential() 
+model.add(vgg_base) 
+model.add(Flatten()) 
+model.add(Dense(512, activation='relu')) 
+model.add(Dropout(0.5)) 
+model.add(Dense(10, activation='softmax'))
+
+model.compile(optimizer=Adam(learning_rate=0.0001), 
+              loss='sparse_categorical_crossentropy', 
+              metrics=['accuracy']) 
+
+from tensorflow.keras.utils import plot_model
+plot_model(model, to_file='cnn.png', show_shapes=True, 
+           show_layer_names=True, dpi=300)
+
+import matplotlib.pyplot as plt
+plt.figure(figsize=(20, 20)) 
+img = plt.imread('cnn.png') 
+plt.imshow(img) 
+plt.axis('off') 
+plt.show() 
+
+from tensorflow.keras.datasets import mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train = x_train[..., None]  # shape: (60000, 28, 28, 1)
+x_test = x_test[..., None]
+x_train = x_train / 255.0
+x_test = x_test / 255.0
+
+from tensorflow.keras.datasets import cifar10
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+x_train = x_train / 255.0
+x_test = x_test / 255.0
+
+
+import tensorflow as tf
+from tensorflow.keras.datasets import cifar10
+(x_train, y_train), (x_test, y_test) = cifar10.load_data()
+def preprocess(img, label):
+    img = tf.cast(img, tf.float32) / 255.0   # normalize lazily
+    img = tf.image.resize(img, (64,64))      # smaller size than 224x224
+    return img, label
+train_ds = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+train_ds = train_ds.map(preprocess).batch(32).prefetch(tf.data.AUTOTUNE)
+test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+test_ds = test_ds.map(preprocess).batch(32).prefetch(tf.data.AUTOTUNE)
+
+x_train_small = x_train[:5000]
+y_train_small = y_train[:5000]
+x_test_small = x_test[:1000]
+y_test_small = y_test[:1000]
+
+
+from tensorflow.keras import layers, models
+model = models.Sequential([
+    layers.Input(shape=(32, 32, 3)),   
+    layers.Conv2D(32, (3,3), activation='relu'),
+    layers.MaxPooling2D((2,2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.MaxPooling2D((2,2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(10, activation='softmax')
+])
+
+
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras import layers, models
+from tensorflow.keras.datasets import mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train = np.expand_dims(x_train, -1)  
+x_test = np.expand_dims(x_test, -1)
+x_train = np.repeat(x_train, 3, axis=-1)
+x_test = np.repeat(x_test, 3, axis=-1)
+x_train = x_train.astype("float32") / 255.0
+x_test = x_test.astype("float32") / 255.0
+num_classes = 10
+y_train = tf.keras.utils.to_categorical(y_train, num_classes)
+y_test = tf.keras.utils.to_categorical(y_test, num_classes)
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 3)),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(num_classes, activation='softmax')
+])
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+history = model.fit(x_train, y_train, epochs=5, batch_size=64, validation_split=0.2)
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print("Test accuracy:", test_acc)
+
+
+test_loss, test_acc = model.evaluate(x_test, y_test) 
+print(f'Test Loss: {test_loss:.4f}') 
+print(f'Test Accuracy: {test_acc * 100:.2f}%')
+
+import matplotlib.pyplot as plt
+
+
+plt.figure(figsize=(12, 5))
+plt.plot(history.history['accuracy'], label='Train Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+plt.subplot(1, 2, 1) 
+plt.plot(history.history['accuracy'], label='Train Accuracy') 
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy') 
+plt.title('Model Accuracy') 
+plt.xlabel('Epoch') 
+plt.ylabel('Accuracy') 
+plt.legend()
+
+plt.subplot(1, 2, 2) 
+plt.plot(history.history['loss'], label='Train Loss') 
+plt.plot(history.history['val_loss'], label='Validation Loss') 
+plt.title('Model Loss') 
+plt.xlabel('Epoch') 
+plt.ylabel('Loss') 
+plt.legend() 
+plt.tight_layout() 
+plt.show() 
+
+class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 
+'dog', 'frog', 'horse', 'ship', 'truck']
+
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+sample = tf.image.resize(x_test[0], (28, 28))  
+sample = np.expand_dims(sample, axis=0)       
+prediction = model.predict(sample)
+predicted_class = np.argmax(prediction)
+print("Predicted class:", class_names[predicted_class])
+plt.imshow(x_test[0])  # original image
+plt.title(f"Predicted: {class_names[predicted_class]}")
+plt.axis("off")
+plt.show()
+
+
+
+
+
